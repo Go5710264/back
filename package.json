@@ -1,0 +1,19 @@
+{
+  "name": "application-management-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "watch": "forever -w server.js",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "koa": "^2.14.2",
+    "koa-body": "^6.0.1"
+  },
+  "devDependencies": {
+    "forever": "^4.0.3"
+  }
+}
