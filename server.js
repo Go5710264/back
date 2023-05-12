@@ -57,19 +57,20 @@ function getTecket (contex, next) {
             });
 
             return next();
+        case 'createTicket':
+            console.log(contex.request.body)
+            // Тело запроса не отображается
+            return;
         default:
-            console.log(method);
-            return contex.response.status = 404;
+            contex.response.status = 404;
+            return;
     }
 }
 
-app.use(async (ctx, next) => {
+app.use((ctx, next) => {
     getTecket(ctx, next)
 })
 
-// app.use(async (ctx, next) => {
-//     getTecket(ctx, next)
-// })
 
 const server = http.createServer(app.callback());
 const port = 7070;
