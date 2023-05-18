@@ -1,11 +1,13 @@
 const http = require('http');
 const Koa = require('koa');
 const { koaBody } = require('koa-body');
+const uuid = require('uuid');
 
 const app = new Koa();
 
 app.use(koaBody({
     urlencoded: true,
+    multipart: true,
 }))
 
 const tickets = [
@@ -43,6 +45,7 @@ const ticketFull = [
 function getTecket (contex, next) {
     contex.response.set('Access-Control-Allow-Origin', '*');
     const { method } = contex.request.query;
+    console.log(contex.request.method)
     
     switch (method){
         case 'allTickets':
@@ -59,13 +62,33 @@ function getTecket (contex, next) {
             return next();
         case 'createTicket':
             console.log(contex.request.body)
-            // Тело запроса не отображается
+
+            contex.request.body.id = uuid.v4();
+            contex.request.body.created = Date.now();
+
+            ticketFull.push(contex.request.body)
+        
+            contex.response.body = contex.request.body;
+            console.log(ticketFull)
             return;
         default:
             contex.response.status = 404;
             return;
     }
 }
+
+app.use((ctx, next) => {
+    if(ctx.request.method !== 'OPTIONS'){
+        next();
+
+        return;
+    }
+
+    ctx.response.set('Access-Control-Allow-Origin', '*');
+    ctx.response.set('Access-Control-Allow-Methods', 'DELETE, PUT, PATCH, GET, POST');
+
+    ctx.response.status = 204;
+})
 
 app.use((ctx, next) => {
     getTecket(ctx, next)
