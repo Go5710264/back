@@ -61,15 +61,15 @@ function getTecket (contex, next) {
 
             return next();
         case 'createTicket':
-            console.log(contex.request.body)
-
             contex.request.body.id = uuid.v4();
             contex.request.body.created = Date.now();
 
-            ticketFull.push(contex.request.body)
+            ticketFull.push(contex.request.body);
+
+            delete contex.request.body.ditailes
+            tickets.push(contex.request.body)
         
             contex.response.body = contex.request.body;
-            console.log(ticketFull)
             return;
         default:
             contex.response.status = 404;
