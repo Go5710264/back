@@ -10,7 +10,7 @@ app.use(koaBody({
     multipart: true,
 }))
 
-const tickets = [
+let tickets = [
     {
         id:1,
         name: 'Установить обновление',
@@ -25,7 +25,7 @@ const tickets = [
     }
 ];
 
-const ticketFull = [
+let ticketFull = [
     {
         id:1,
         name: 'Установить обновление',
@@ -45,7 +45,6 @@ const ticketFull = [
 function getTecket (contex, next) {
     contex.response.set('Access-Control-Allow-Origin', '*');
     const { method } = contex.request.query;
-    console.log(contex.request.method)
     
     switch (method){
         case 'allTickets':
@@ -78,6 +77,8 @@ function getTecket (contex, next) {
 }
 
 app.use((ctx, next) => {
+    console.log('-----------------------------')
+    console.log(ctx.request.method)
     if(ctx.request.method !== 'OPTIONS'){
         next();
 
@@ -86,6 +87,27 @@ app.use((ctx, next) => {
 
     ctx.response.set('Access-Control-Allow-Origin', '*');
     ctx.response.set('Access-Control-Allow-Methods', 'DELETE, PUT, PATCH, GET, POST');
+
+    ctx.response.status = 204;
+})
+
+app.use((ctx, next) => {
+    if(ctx.request.method !== 'DELETE'){
+        next();
+
+        return;
+    }
+
+    ctx.response.set('Access-Control-Allow-Origin', '*');
+
+    const { method: id } = ctx.request.query;
+
+    tickets = tickets.filter((task) => task.id !== id);
+    ticketFull = ticketFull.filter((task) => task.id !== id);
+
+    // Почему то данный текст не отображается в response в хроме
+    ctx.response.body = 'ticket deleted';
+    console.log(ctx.response)
 
     ctx.response.status = 204;
 })
