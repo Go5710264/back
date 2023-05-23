@@ -27,14 +27,14 @@ let tickets = [
 
 let ticketFull = [
     {
-        id:1,
+        id:'1',
         name: 'Установить обновление',
         description: 'Вышло новое обновление Linux, необоходимо перезапустить все ПК на 8 этаже',
         status: true,
         created: 1672651320000,
     },
     {
-        id:2,
+        id:'2',
         name: 'Заменить принтер',
         description: 'Заявка на замену принтера поступила 01.05.2020, пора уже заменить. 126 кабинет.',
         status: false,
@@ -59,26 +59,27 @@ function getTecket (contex, next) {
             });
 
             return next();
+
         case 'createTicket':
             contex.request.body.id = uuid.v4();
             contex.request.body.created = Date.now();
 
             ticketFull.push(contex.request.body);
 
-            delete contex.request.body.ditailes
+            delete contex.request.body.description
             tickets.push(contex.request.body)
         
             contex.response.body = contex.request.body;
             return;
+            
         default:
             contex.response.status = 404;
             return;
     }
 }
 
+
 app.use((ctx, next) => {
-    console.log('-----------------------------')
-    console.log(ctx.request.method)
     if(ctx.request.method !== 'OPTIONS'){
         next();
 
@@ -91,25 +92,28 @@ app.use((ctx, next) => {
     ctx.response.status = 204;
 })
 
+
 app.use((ctx, next) => {
+
     if(ctx.request.method !== 'DELETE'){
         next();
 
         return;
     }
-
     ctx.response.set('Access-Control-Allow-Origin', '*');
 
-    const { method: id } = ctx.request.query;
+    let { method: id } = ctx.request.query;
 
     tickets = tickets.filter((task) => task.id !== id);
+
     ticketFull = ticketFull.filter((task) => task.id !== id);
 
     // Почему то данный текст не отображается в response в хроме
     ctx.response.body = 'ticket deleted';
-    console.log(ctx.response)
+    console.log('_______')
 
     ctx.response.status = 204;
+    console.log(ticketFull, tickets)
 })
 
 app.use((ctx, next) => {
