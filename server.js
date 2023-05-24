@@ -12,13 +12,13 @@ app.use(koaBody({
 
 let tickets = [
     {
-        id:1,
+        id:'1',
         name: 'Установить обновление',
         status: true,
         created: 1672651320000,
     },
     {
-        id:2,
+        id:'2',
         name: 'Заменить принтер',
         status: false,
         created: 1684137600000,
@@ -48,19 +48,23 @@ function getTecket (contex, next) {
     
     switch (method){
         case 'allTickets':
+
             contex.response.body = tickets;
-            return next();
+
+            return;
 
         case 'ticketById':
+            
             const { id: ticketID } = contex.request.query;
             
             contex.response.body = ticketFull.find((item) => {
                 if(item.id == ticketID) return true;
             });
 
-            return next();
+            return;
 
         case 'createTicket':
+
             contex.request.body.id = uuid.v4();
             contex.request.body.created = Date.now();
 
@@ -71,8 +75,36 @@ function getTecket (contex, next) {
         
             contex.response.body = contex.request.body;
             return;
+
+        case 'editedTicket':
+
+            let receivedTicket = JSON.parse(contex.request.body)
+
+            let adjustmentsTicketFull = ticketFull.find((item) => {
+                if(item.id == receivedTicket.id) return true;
+            });
+
+            let adjustmentsTicket = tickets.find((item) => {
+                if(item.id == receivedTicket.id) return true;
+            });
+
+            if(adjustmentsTicket.status !== receivedTicket.status){
+                adjustmentsTicketFull.status = receivedTicket.status;
+                adjustmentsTicket.status = receivedTicket.status;
+
+                return;
+            }
+
+            adjustmentsTicketFull.name = receivedTicket.name;
+            adjustmentsTicketFull.description = receivedTicket.description;
+
+            adjustmentsTicket.name = receivedTicket.name;
+            contex.response.status = 204;
+
+            return;
             
         default:
+
             contex.response.status = 404;
             return;
     }
@@ -80,6 +112,7 @@ function getTecket (contex, next) {
 
 
 app.use((ctx, next) => {
+
     if(ctx.request.method !== 'OPTIONS'){
         next();
 
@@ -108,12 +141,10 @@ app.use((ctx, next) => {
 
     ticketFull = ticketFull.filter((task) => task.id !== id);
 
-    // Почему то данный текст не отображается в response в хроме
+    // Данный текст должен отображаться в response DewTools
     ctx.response.body = 'ticket deleted';
-    console.log('_______')
 
     ctx.response.status = 204;
-    console.log(ticketFull, tickets)
 })
 
 app.use((ctx, next) => {
