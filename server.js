@@ -70,8 +70,10 @@ function getTecket (contex, next) {
 
             ticketFull.push(contex.request.body);
 
-            delete contex.request.body.description
-            tickets.push(contex.request.body)
+            const copyTicket = { ...contex.request.body }
+            delete copyTicket.description
+            
+            tickets.push(copyTicket)
         
             contex.response.body = contex.request.body;
             return;
@@ -80,25 +82,19 @@ function getTecket (contex, next) {
 
             let receivedTicket = JSON.parse(contex.request.body)
 
-            let adjustmentsTicketFull = ticketFull.find((item) => {
-                if(item.id == receivedTicket.id) return true;
-            });
+            let candidate = tickets.find((t) => t.id === receivedTicket.id)
 
-            let adjustmentsTicket = tickets.find((item) => {
-                if(item.id == receivedTicket.id) return true;
-            });
+            if(!candidate) contex.response.status = 404;
 
-            if(adjustmentsTicket.status !== receivedTicket.status){
-                adjustmentsTicketFull.status = receivedTicket.status;
-                adjustmentsTicket.status = receivedTicket.status;
+            candidate.status = receivedTicket.status;
+            candidate.name = receivedTicket.name;
 
-                return;
-            }
+            candidate = ticketFull.find((t) => t.id === receivedTicket.id)
 
-            adjustmentsTicketFull.name = receivedTicket.name;
-            adjustmentsTicketFull.description = receivedTicket.description;
-
-            adjustmentsTicket.name = receivedTicket.name;
+            candidate.status = receivedTicket.status;
+            candidate.name = receivedTicket.name;
+            candidate.description = receivedTicket.description;
+            
             contex.response.status = 204;
 
             return;
@@ -141,14 +137,18 @@ app.use((ctx, next) => {
 
     ticketFull = ticketFull.filter((task) => task.id !== id);
 
+    ctx.response.status = 200;
+
     // Данный текст должен отображаться в response DewTools
     ctx.response.body = 'ticket deleted';
-
-    ctx.response.status = 204;
 })
 
 app.use((ctx, next) => {
     getTecket(ctx, next)
+    // console.log('----')
+    // console.log(tickets);
+    // console.log(ticketFull);
+
 })
 
 
